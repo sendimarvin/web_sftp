@@ -1,6 +1,6 @@
 from flask import Flask
 import os
-from flask import send_file, render_template_string
+from flask import send_file, render_template
 
 
 app = Flask(__name__)
@@ -9,9 +9,6 @@ app = Flask(__name__)
 def hello_world():
    return 'Hello World'
 
-@app.route('/hello/<name>')
-def hello_name(name):
-   return 'Hello %s!' % name
 
 @app.route('/files/', defaults={'path': ''})
 @app.route('/files/<path:path>')
@@ -35,34 +32,8 @@ def list_files(path):
             item_type = 'dir' if os.path.isdir(full_path) else 'file'
             files.append({'name': item, 'type': item_type})
             
-        html_template = '''
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Directory Listing</title>
-            <style>
-                .folder { font-weight: bold; }
-                a { text-decoration: none; }
-            </style>
-        </head>
-        <body>
-            <h2>Directory: {{ path if path else '/' }}</h2>
-            {% if path %}
-            <p><a href="{{ '../' }}">..</a></p>
-            {% endif %}
-            <ul>
-            {% for file in files %}
-                <li>
-                    <a href="{{ file.name }}" {{ 'class="folder"' if file.type == 'dir' }}>
-                        {{ file.name }}{{ '/' if file.type == 'dir' }}
-                    </a>
-                </li>
-            {% endfor %}
-            </ul>
-        </body>
-        </html>
-        '''
-        return render_template_string(html_template, files=files, path=path)
+       
+        return render_template('directory_listing.html', files=files, path=path)
         
     return "Not found", 404
 

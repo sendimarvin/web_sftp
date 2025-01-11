@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Directory Listing</title>
+    <style>
+        .folder { font-weight: bold; }
+        a { text-decoration: none; }
+    </style>
+</head>
+<body>
+    <h2>Directory: {{ path if path else '/' }}</h2>
+    {% if path %}
+    <p><a href="{{ '../' }}">..</a></p>
+    {% endif %}
+    <ul>
+    {% for file in files %}
+        <li>
+            <a href="{{ file.name }}" {{ 'class="folder"' if file.type == 'dir' }}>
+                {{ file.name }}{{ '/' if file.type == 'dir' }}
+            </a>
+        </li>
+    {% endfor %}
+    </ul>
+</body>
+</html>
