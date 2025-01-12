@@ -1,6 +1,7 @@
 from extensions import db
+from flask_login import UserMixin
 
-class User(db.Model):
+class User(UserMixin, db.Model):
     __tablename__ = 'Users'
 
     UserID = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -13,6 +14,13 @@ class User(db.Model):
 
     # Relationship with UserPermissions
     permissions = db.relationship('UserPermission', back_populates='user', cascade="all, delete-orphan")
+
+    def get_id(self):
+        return str(self.UserID)
+
+    def check_password(self, password):
+        from werkzeug.security import check_password_hash
+        return check_password_hash(self.PasswordHash, password)
 
     def __repr__(self):
         return f"<User(UserID={self.UserID}, Username='{self.Username}')>"

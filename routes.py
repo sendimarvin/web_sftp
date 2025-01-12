@@ -1,7 +1,11 @@
-from flask import Blueprint, jsonify, send_file, render_template, current_app
+from flask import Blueprint, jsonify, request, redirect, url_for, flash, render_template
+from flask_login import login_user, logout_user, login_required, current_user
+from werkzeug.security import generate_password_hash
 from models import User
 import os
 from extensions import db
+from flask import current_app, send_file
+
 
 # Create a Blueprint
 main = Blueprint("main", __name__)
@@ -28,13 +32,9 @@ def list_users():
     return jsonify(user_list)
 
 
-@main.route('/')
-def hello_world():
-   return 'Login'
-
-
 @main.route('/files/', defaults={'path': ''})
 @main.route('/files/<path:path>')
+@login_required
 def list_files(path):
    base_dir = current_app.config['BASE_DIR']
    current_app.logger.info("base_dir: "+base_dir)
@@ -90,3 +90,63 @@ def list_files(path):
                            breadcrumbs=breadcrumbs)
       
    return "Not found", 404
+
+
+@main.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        
+        user = User.query.filter_by(Username=username).first()
+        if user and user.check_password(password):
+            # Get the next page from args or use default
+            next_page = request.args.get('next')
+            login_user(user)
+            
+            # Validate that the next_page is safe
+            if not next_page or not next_page.startswith('/'):
+                next_page = url_for('main.list_files', path='')
+                
+            return redirect(next_page)
+        else:
+            flash('Invalid username or password')
+    
+    return render_template('login.html')
+
+@main.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('main.login'))
+
+@main.route('/create-user', methods=['GET', 'POST'])
+@login_required  # Optional: restrict user creation to logged-in users only
+def create_user():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        fullname = request.form.get('fullname')
+        email = request.form.get('email')
+        
+        # Check if username already exists
+        if User.query.filter_by(Username=username).first():
+            flash('Username already exists')
+            return redirect(url_for('main.create_user'))
+        
+        try:
+            new_user = User(
+                Username=username,
+                PasswordHash=generate_password_hash(password),
+                FullName=fullname,
+                Email=email
+            )
+            db.session.add(new_user)
+            db.session.commit()
+            flash('User created successfully!', 'success')
+            return redirect(url_for('main.list_users'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error creating user: {str(e)}')
+            
+    return render_template('create_user.html')

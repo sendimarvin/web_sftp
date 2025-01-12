@@ -1,4 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager
 
-# Initialize the SQLAlchemy object
 db = SQLAlchemy()
+login_manager = LoginManager()
