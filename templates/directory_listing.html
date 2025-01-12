@@ -8,6 +8,17 @@
     <div class="logout-container">
         <a href="/sharepoint/logout" class="logout-button">Logout</a>
     </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
     <div class="breadcrumbs">
         <a href="/sharepoint/" class="breadcrumb-item">🏠 Home</a>
         {% for crumb in breadcrumbs %}

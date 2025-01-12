@@ -5,7 +5,7 @@ from models import User
 import os
 from extensions import db
 from flask import current_app, send_file
-
+from models import Path, UserPermission
 
 # Create a Blueprint
 main = Blueprint("main", __name__)
@@ -41,60 +41,96 @@ def list_users():
 @main.route(f'/sharepoint/<path:path>')
 @login_required
 def list_files(path):
-   base_dir = current_app.config['BASE_DIR']
-   current_app.logger.info("base_dir: "+base_dir)
+    base_dir = current_app.config['BASE_DIR']
+    current_app.logger.info("base_dir: "+base_dir)
+    
+    # Normalize the path to use forward slashes
+    path = path.replace('\\', '/')
+
+
+    # Always allow access to the root directory
+    if not path.strip('/'):
+        has_permission = True
+    else:
+        # Check user permissions
+        user_paths = db.session.query(Path.Path).join(UserPermission).filter(
+            UserPermission.UserID == current_user.UserID
+        ).all()
+        user_paths = [p[0] for p in user_paths]  # Extract paths from query result
+        
+        # If user has root access ('/'), grant permission to everything
+        if '/' in user_paths:
+            has_permission = True
+        # Always allow access to the root directory
+        elif not path.strip('/'):
+            has_permission = True
+        else:
+            # Check if the requested path is allowed
+            has_permission = False
+            for allowed_path in user_paths:
+                # Convert both paths to normalized form for comparison
+                norm_allowed_path = allowed_path.strip('/').lower()
+                norm_request_path = path.strip('/').lower()
+                
+                # Check if the requested path starts with any of the allowed paths
+                if norm_request_path == norm_allowed_path or norm_request_path.startswith(norm_allowed_path + '/'):
+                    has_permission = True
+                    break
+        
+    if not has_permission:
+        flash('You do not have permission to access this location.', 'error')
+        return redirect(url_for('main.list_files', path=''))
    
-   # Normalize the path to use forward slashes
-   path = path.replace('\\', '/')
-   abs_path = os.path.join(base_dir, path)
-   
-   # Security check to prevent directory traversal
-   if not os.path.abspath(abs_path).startswith(os.path.abspath(base_dir)):
-      return "Access denied", 403
-      
-   if os.path.isfile(abs_path):
-      return send_file(abs_path, as_attachment=True)
-      
-   if os.path.isdir(abs_path):
-      files = []
-      for item in os.listdir(abs_path):
-         full_path = os.path.join(abs_path, item)
-         item_type = 'dir' if os.path.isdir(full_path) else 'file'
-         
-         # Create the URL-safe path for this item
-         # Ensure we use the current path as prefix
-         if path:
-               item_path = f"{path}/{item}"
-         else:
-               item_path = item
-               
-         files.append({
-               'name': item,
-               'type': item_type,
-               'path': item_path
-         })
-         
-      # Create breadcrumbs
-      breadcrumbs = []
-      current_path = ''
-      parts = [p for p in path.split('/') if p]  # Filter out empty parts
-      
-      for part in parts:
-         if current_path:
-               current_path = f"{current_path}/{part}"
-         else:
-               current_path = part
-         breadcrumbs.append({
-               'name': part,
-               'path': current_path
-         })
-      
-      return render_template('directory_listing.html', 
-                           files=files, 
-                           path=path, 
-                           breadcrumbs=breadcrumbs)
-      
-   return "Not found", 404
+
+    abs_path = os.path.join(base_dir, path)
+    
+    # Security check to prevent directory traversal
+    if not os.path.abspath(abs_path).startswith(os.path.abspath(base_dir)):
+        return "Access denied", 403
+        
+    if os.path.isfile(abs_path):
+        return send_file(abs_path, as_attachment=True)
+        
+    if os.path.isdir(abs_path):
+        files = []
+        for item in os.listdir(abs_path):
+            full_path = os.path.join(abs_path, item)
+            item_type = 'dir' if os.path.isdir(full_path) else 'file'
+            
+            # Create the URL-safe path for this item
+            # Ensure we use the current path as prefix
+            if path:
+                item_path = f"{path}/{item}"
+            else:
+                item_path = item
+                
+            files.append({
+                'name': item,
+                'type': item_type,
+                'path': item_path
+            })
+            
+        # Create breadcrumbs
+        breadcrumbs = []
+        current_path = ''
+        parts = [p for p in path.split('/') if p]  # Filter out empty parts
+        
+        for part in parts:
+            if current_path:
+                current_path = f"{current_path}/{part}"
+            else:
+                current_path = part
+            breadcrumbs.append({
+                'name': part,
+                'path': current_path
+            })
+        
+        return render_template('directory_listing.html', 
+                            files=files, 
+                            path=path, 
+                            breadcrumbs=breadcrumbs)
+        
+    return "Not found", 404
 
 
 @main.route(f'/sharepoint/login', methods=['GET', 'POST'])

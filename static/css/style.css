@@ -204,3 +204,17 @@ li a[href$=".txt"] i { color: #424242; }
 .logout-button:hover {
     background-color: #d32f2f;
 }
+
+
+.alert {
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+}
+
+.alert-error {
+    color: #721c24;
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+}
