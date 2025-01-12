@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Web SFTP</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="logout-container">
+        <a href="/sharepoint/logout" class="logout-button">Logout</a>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="breadcrumbs">
+        <a href="/sharepoint/" class="breadcrumb-item">🏠 Home</a>
+        {% for crumb in breadcrumbs %}
+            <span class="separator">/</span>
+            <a href="/sharepoint/{{ crumb.path }}" class="breadcrumb-item">{{ crumb.name }}</a>
+        {% endfor %}
+    </div>
+
+    <div class="search-container">
+        <input type="text" id="fileSearch" placeholder="Search files and folders..." class="search-input">
+    </div>
+
+    <ul id="fileList">
+        {% for file in files %}
+            <li class="{{ 'folder' if file.type == 'dir' else 'file' }}" data-filename="{{ file.name.lower() }}">
+                {% if file.type == 'dir' %}
+                    📁 <a href="/sharepoint/{{ file.path }}" class="folder" title="{{ file.name }}">{{ file.name }}/</a>
+                {% else %}
+                    📄 <a href="/sharepoint/{{ file.path }}" title="{{ file.name }}">{{ file.name }}</a>
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}" defer></script>
+</body>
+</html>

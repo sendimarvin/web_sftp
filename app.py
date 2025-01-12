@@ -1,71 +1,41 @@
 from flask import Flask
 import os
-from flask import send_file, render_template_string
+from config import Config
+from extensions import db, login_manager
+from routes import main
+from flask_wtf.csrf import CSRFProtect
+from models import User
+from flask import Flask
+from dotenv import load_dotenv
 
+def create_app():
+   app = Flask(__name__)
 
-app = Flask(__name__)
+   # Load configuration
+   app.config.from_object(Config)
 
-@app.route('/')
-def hello_world():
-   return 'Hello World'
-
-@app.route('/hello/<name>')
-def hello_name(name):
-   return 'Hello %s!' % name
-
-@app.route('/files/', defaults={'path': ''})
-@app.route('/files/<path:path>')
-def list_files(path):
-    base_dir = 'D:\logs'  # Change this to your desired directory
-    abs_path = os.path.join(base_dir, path)
+   # Initialize database
+   db.init_app(app)
+   login_manager.init_app(app)
     
-    # Security check to prevent directory traversal
-    if not os.path.abspath(abs_path).startswith(os.path.abspath(base_dir)):
-        return "Access denied", 403
-        
-    # If path is a file, send it as download
-    if os.path.isfile(abs_path):
-        return send_file(abs_path, as_attachment=True)
-        
-    # If path is a directory, list contents
-    if os.path.isdir(abs_path):
-        files = []
-        for item in os.listdir(abs_path):
-            full_path = os.path.join(abs_path, item)
-            item_type = 'dir' if os.path.isdir(full_path) else 'file'
-            files.append({'name': item, 'type': item_type})
-            
-        html_template = '''
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Directory Listing</title>
-            <style>
-                .folder { font-weight: bold; }
-                a { text-decoration: none; }
-            </style>
-        </head>
-        <body>
-            <h2>Directory: {{ path if path else '/' }}</h2>
-            {% if path %}
-            <p><a href="{{ '../' }}">..</a></p>
-            {% endif %}
-            <ul>
-            {% for file in files %}
-                <li>
-                    <a href="{{ file.name }}" {{ 'class="folder"' if file.type == 'dir' }}>
-                        {{ file.name }}{{ '/' if file.type == 'dir' }}
-                    </a>
-                </li>
-            {% endfor %}
-            </ul>
-        </body>
-        </html>
-        '''
-        return render_template_string(html_template, files=files, path=path)
-        
-    return "Not found", 404
+    # Configure login manager
+   login_manager.login_view = 'main.login'
+
+   @login_manager.user_loader
+   def load_user(user_id):
+      return User.query.get(int(user_id))
+
+   # In your create_app function:
+   csrf = CSRFProtect()
+   csrf.init_app(app)
+
+   # Register the blueprint
+   app.register_blueprint(main)
+   
+   
+   return app
 
 
 if __name__ == '__main__':
+   app = create_app()
    app.run(host='0.0.0.0', port = 5000, debug=True)
