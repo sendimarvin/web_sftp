@@ -4,6 +4,10 @@ body {
     background-color: #f5f5f5;
 }
 
+.folder { font-weight: bold; }
+a { text-decoration: none; }
+.breadcrumbs { margin-bottom: 20px; }
+
 h2 {
     color: #333;
     padding: 10px;
@@ -138,3 +142,22 @@ li a[href$=".xls"] i, li a[href$=".xlsx"] i { color: #2E7D32; }
 li a[href$=".jpg"] i, li a[href$=".png"] i, li a[href$=".gif"] i { color: #6A1B9A; }
 li a[href$=".zip"] i, li a[href$=".rar"] i { color: #FF8F00; }
 li a[href$=".txt"] i { color: #424242; }
+
+
+.breadcrumbs {
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    margin-bottom: 20px;
+}
+.breadcrumb-item {
+    color: #0066cc;
+    text-decoration: none;
+}
+.breadcrumb-item:hover {
+    text-decoration: underline;
+}
+.separator {
+    color: #6c757d;
+    margin: 0 5px;
+}

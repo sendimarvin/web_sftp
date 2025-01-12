@@ -3,25 +3,24 @@
 <head>
     <title>Web SFTP</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <style>
-        .folder { font-weight: bold; }
-        a { text-decoration: none; }
-    </style>
 </head>
 <body>
-    <h2>Directory: {{ path if path else '/' }}</h2>
-    {% if path %}
-    <p><a href="{{ '../' }}">..</a></p>
-    {% endif %}
+    <div class="breadcrumbs">
+        <a href="/files/" class="breadcrumb-item">🏠 Home</a>
+        {% for crumb in breadcrumbs %}
+            <span class="separator">/</span>
+            <a href="/files/{{ crumb.path }}" class="breadcrumb-item">{{ crumb.name }}</a>
+        {% endfor %}
+    </div>
+
     <ul>
     {% for file in files %}
-        <li>
-            <a href="{{ file.name }}" 
-            {{ 'class="folder"' if file.type == 'dir' }}
-            title="{{ file.name }}{{ '/' if file.type == 'dir' }}">
-                <i class="{{ 'fas fa-folder' if file.type == 'dir' else 'fas fa-file' }}"></i>
-                {{ file.name }}{{ '/' if file.type == 'dir' }}
-            </a>
+        <li class="{{ 'folder' if file.type == 'dir' else 'file' }}">
+            {% if file.type == 'dir' %}
+                📁 <a href="/files/{{ file.path }}" class="folder">{{ file.name }}/</a>
+            {% else %}
+                📄 <a href="/files/{{ file.path }}">{{ file.name }}</a>
+            {% endif %}
         </li>
     {% endfor %}
     </ul>
