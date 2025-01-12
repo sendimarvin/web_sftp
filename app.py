@@ -1,78 +1,24 @@
 from flask import Flask
 import os
-from flask import send_file, render_template
-from dotenv import load_dotenv
+from config import Config
+from extensions import db
+from routes import main
 
-# Load .env file
-load_dotenv()
+def create_app():
+   app = Flask(__name__)
 
+   # Load configuration
+   app.config.from_object(Config)
 
-app = Flask(__name__)
-app.config['BASE_DIR'] = os.getenv('BASE_DIR', 'D:')
+   # Initialize database
+   db.init_app(app)
 
-@app.route('/')
-def hello_world():
-   return 'Login'
-
-
-@app.route('/files/', defaults={'path': ''})
-@app.route('/files/<path:path>')
-def list_files(path):
-   base_dir = app.config['BASE_DIR']
-   app.logger.info("base_dir: "+base_dir)
+   # Register the blueprint
+   app.register_blueprint(main)
    
-   # Normalize the path to use forward slashes
-   path = path.replace('\\', '/')
-   abs_path = os.path.join(base_dir, path)
-   
-   # Security check to prevent directory traversal
-   if not os.path.abspath(abs_path).startswith(os.path.abspath(base_dir)):
-      return "Access denied", 403
-      
-   if os.path.isfile(abs_path):
-      return send_file(abs_path, as_attachment=True)
-      
-   if os.path.isdir(abs_path):
-      files = []
-      for item in os.listdir(abs_path):
-         full_path = os.path.join(abs_path, item)
-         item_type = 'dir' if os.path.isdir(full_path) else 'file'
-         
-         # Create the URL-safe path for this item
-         # Ensure we use the current path as prefix
-         if path:
-               item_path = f"{path}/{item}"
-         else:
-               item_path = item
-               
-         files.append({
-               'name': item,
-               'type': item_type,
-               'path': item_path
-         })
-         
-      # Create breadcrumbs
-      breadcrumbs = []
-      current_path = ''
-      parts = [p for p in path.split('/') if p]  # Filter out empty parts
-      
-      for part in parts:
-         if current_path:
-               current_path = f"{current_path}/{part}"
-         else:
-               current_path = part
-         breadcrumbs.append({
-               'name': part,
-               'path': current_path
-         })
-      
-      return render_template('directory_listing.html', 
-                           files=files, 
-                           path=path, 
-                           breadcrumbs=breadcrumbs)
-      
-   return "Not found", 404
+   return app
 
 
 if __name__ == '__main__':
+   app = create_app()
    app.run(host='0.0.0.0', port = 5000, debug=True)
