@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>Web SFTP</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', _external=True) }}">
 </head>
 <body>
     <div class="logout-container">
@@ -43,6 +43,6 @@
         {% endfor %}
     </ul>
 
-    <script src="{{ url_for('static', filename='js/script.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/script.js', _external=True) }}" defer></script>
 </body>
 </html>
