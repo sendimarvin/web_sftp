@@ -10,7 +10,12 @@ from flask import current_app, send_file
 # Create a Blueprint
 main = Blueprint("main", __name__)
 
-@main.route("/users", methods=["GET"])
+@main.route('/')
+def root():
+    return redirect(url_for('main.list_files', path=''))
+
+
+@main.route(f'/sharepoint/users', methods=["GET"])
 def list_users():
     """List all users in the database."""
     # Query all users
@@ -32,8 +37,8 @@ def list_users():
     return jsonify(user_list)
 
 
-@main.route('/files/', defaults={'path': ''})
-@main.route('/files/<path:path>')
+@main.route(f'/sharepoint/', defaults={'path': ''})
+@main.route(f'/sharepoint/<path:path>')
 @login_required
 def list_files(path):
    base_dir = current_app.config['BASE_DIR']
@@ -92,7 +97,7 @@ def list_files(path):
    return "Not found", 404
 
 
-@main.route('/login', methods=['GET', 'POST'])
+@main.route(f'/sharepoint/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         username = request.form.get('username')
@@ -114,13 +119,13 @@ def login():
     
     return render_template('login.html')
 
-@main.route('/logout')
+@main.route(f'/sharepoint/logout')
 @login_required
 def logout():
     logout_user()
     return redirect(url_for('main.login'))
 
-@main.route('/create-user', methods=['GET', 'POST'])
+@main.route(f'/sharepoint/create-user', methods=['GET', 'POST'])
 @login_required  # Optional: restrict user creation to logged-in users only
 def create_user():
     if request.method == 'POST':

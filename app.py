@@ -5,6 +5,8 @@ from extensions import db, login_manager
 from routes import main
 from flask_wtf.csrf import CSRFProtect
 from models import User
+from flask import Flask
+from dotenv import load_dotenv
 
 def create_app():
    app = Flask(__name__)

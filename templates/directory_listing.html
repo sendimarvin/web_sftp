@@ -6,10 +6,10 @@
 </head>
 <body>
     <div class="breadcrumbs">
-        <a href="/files/" class="breadcrumb-item">🏠 Home</a>
+        <a href="/sharepoint/" class="breadcrumb-item">🏠 Home</a>
         {% for crumb in breadcrumbs %}
             <span class="separator">/</span>
-            <a href="/files/{{ crumb.path }}" class="breadcrumb-item">{{ crumb.name }}</a>
+            <a href="/sharepoint/{{ crumb.path }}" class="breadcrumb-item">{{ crumb.name }}</a>
         {% endfor %}
     </div>
 
@@ -21,9 +21,9 @@
         {% for file in files %}
             <li class="{{ 'folder' if file.type == 'dir' else 'file' }}" data-filename="{{ file.name.lower() }}">
                 {% if file.type == 'dir' %}
-                    📁 <a href="/files/{{ file.path }}" class="folder" title="{{ file.name }}">{{ file.name }}/</a>
+                    📁 <a href="/sharepoint/{{ file.path }}" class="folder" title="{{ file.name }}">{{ file.name }}/</a>
                 {% else %}
-                    📄 <a href="/files/{{ file.path }}" title="{{ file.name }}">{{ file.name }}</a>
+                    📄 <a href="/sharepoint/{{ file.path }}" title="{{ file.name }}">{{ file.name }}</a>
                 {% endif %}
             </li>
         {% endfor %}

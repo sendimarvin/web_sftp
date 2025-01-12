@@ -14,3 +14,4 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SECRET_KEY = os.getenv("SECRET_KEY", "default_secret_key")
     BASE_DIR = os.getenv("BASE_DIR", "D:")
+    #BASE_URL = os.getenv("BASE_URL", "/files")
