@@ -9,7 +9,7 @@ from flask import Flask
 from dotenv import load_dotenv
 
 def create_app():
-   app = Flask(__name__)
+   app = Flask(__name__, static_url_path='/sharepoint/static')
 
    # Load configuration
    app.config.from_object(Config)
