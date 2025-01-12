@@ -1,9 +1,14 @@
 from flask import Flask
 import os
 from flask import send_file, render_template
+from dotenv import load_dotenv
+
+# Load .env file
+load_dotenv()
 
 
 app = Flask(__name__)
+app.config['BASE_DIR'] = os.getenv('BASE_DIR', 'D:')
 
 @app.route('/')
 def hello_world():
@@ -13,7 +18,8 @@ def hello_world():
 @app.route('/files/', defaults={'path': ''})
 @app.route('/files/<path:path>')
 def list_files(path):
-    base_dir = 'D:\logs'  # Change this to your desired directory
+    base_dir = app.config['BASE_DIR']  # Change this to your desired directory
+    app.logger.info("base_dir: "+base_dir)
     abs_path = os.path.join(base_dir, path)
     
     # Security check to prevent directory traversal

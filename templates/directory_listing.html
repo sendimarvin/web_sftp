@@ -16,7 +16,10 @@
     <ul>
     {% for file in files %}
         <li>
-            <a href="{{ file.name }}" {{ 'class="folder"' if file.type == 'dir' }}>
+            <a href="{{ file.name }}" 
+            {{ 'class="folder"' if file.type == 'dir' }}
+            title="{{ file.name }}{{ '/' if file.type == 'dir' }}">
+                <i class="{{ 'fas fa-folder' if file.type == 'dir' else 'fas fa-file' }}"></i>
                 {{ file.name }}{{ '/' if file.type == 'dir' }}
             </a>
         </li>
