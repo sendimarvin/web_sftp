@@ -13,16 +13,20 @@
         {% endfor %}
     </div>
 
-    <ul>
-    {% for file in files %}
-        <li class="{{ 'folder' if file.type == 'dir' else 'file' }}">
-            {% if file.type == 'dir' %}
-                📁 <a href="/files/{{ file.path }}" class="folder">{{ file.name }}/</a>
-            {% else %}
-                📄 <a href="/files/{{ file.path }}">{{ file.name }}</a>
-            {% endif %}
-        </li>
-    {% endfor %}
+    <div class="search-container">
+        <input type="text" id="fileSearch" placeholder="Search files and folders..." class="search-input">
+    </div>
+
+    <ul id="fileList">
+        {% for file in files %}
+            <li class="{{ 'folder' if file.type == 'dir' else 'file' }}" data-filename="{{ file.name.lower() }}">
+                {% if file.type == 'dir' %}
+                    📁 <a href="/files/{{ file.path }}" class="folder">{{ file.name }}/</a>
+                {% else %}
+                    📄 <a href="/files/{{ file.path }}">{{ file.name }}</a>
+                {% endif %}
+            </li>
+        {% endfor %}
     </ul>
 
     <script src="{{ url_for('static', filename='js/script.js') }}" defer></script>
